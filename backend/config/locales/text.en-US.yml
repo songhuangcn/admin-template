@@ -1,0 +1,6 @@
+en-US:
+  text:
+    "您没有权限": You have no permission
+    "您未登录或登录已失效": You are not logged in or your login has expired
+    "账户和密码错误": Invalid username or password
+    "无法操作管理员账户": Cannot change the admin account

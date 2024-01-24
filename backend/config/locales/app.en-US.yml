@@ -1,0 +1,20 @@
+en-US:
+  controller:
+    users: User
+    roles: Role
+    permissions: Permission
+  action:
+    index: List
+    show: Detail
+    create: Create
+    update: Update
+    destroy: Delete
+  activerecord:
+    models:
+      user: User
+    attributes:
+      user:
+        name: Name
+        user_type: User Type
+        created_at: Created At
+        updated_at: Updated At

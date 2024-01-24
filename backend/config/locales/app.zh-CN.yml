@@ -1,0 +1,20 @@
+zh-CN:
+  controller:
+    users: 用户
+    roles: 角色
+    permissions: 权限
+  action:
+    index: 列表
+    show: 详情
+    create: 创建
+    update: 更新
+    destroy: 删除
+  activerecord:
+    models:
+      user: 用户
+    attributes:
+      user:
+        name: 姓名
+        user_type: 用户类型
+        created_at: 用户创建时间
+        updated_at: 用户更新时间

@@ -1,0 +1,60 @@
+x-app: &app
+  image: ${IMAGE_PROXY:-}admin-template-backend:dev
+  build:
+    context: ./backend
+    target: dev
+    args:
+      IMAGE_PROXY: ${IMAGE_PROXY:-}
+      BUNDLER_MIRROR: https://mirrors.cloud.tencent.com/rubygems/
+      APT_MIRROR: mirrors.cloud.tencent.com
+  environment:
+    DATABASE_HOST: mysql
+    DATABASE_USERNAME: root
+    DATABASE_PASSWORD: password
+  # env_file:
+  #   - .env
+  volumes:
+    - ./backend:/app
+    - dev_rubygems:/app/.rubygems
+  stdin_open: true
+  tty: true
+  depends_on:
+    - mysql
+
+services:
+  vuejs:
+    image: ${IMAGE_PROXY:-}admin-template-frontend:dev
+    build:
+      context: ./frontend
+      target: dev
+      args:
+        IMAGE_PROXY: ${IMAGE_PROXY:-}
+        NPM_MIRROR: https://mirrors.tencent.com/npm/
+    platform: linux/amd64
+    command: bash -c "pnpm dev --host 0.0.0.0 --port 4000"
+    volumes:
+      - ./frontend:/app
+      - dev_pnpm_store:/app/.pnpm-store
+      - dev_pnpm_virtual:/app/node_modules
+    ports:
+      - "4000:4000"
+  rails:
+    <<: *app
+    command: bash -c "rm -f tmp/pids/server.pid && bin/rails server -b 0.0.0.0 -p 3000"
+    ports:
+      - "3000:3000"
+  mysql:
+    image: ${IMAGE_PROXY:-}mysql:8.0
+    ports:
+      - "3309:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      TZ: Asia/Shanghai
+    volumes:
+      - dev_mysql:/var/lib/mysql
+
+volumes:
+  dev_pnpm_store:
+  dev_pnpm_virtual:
+  dev_rubygems:
+  dev_mysql:

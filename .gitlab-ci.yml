@@ -1,0 +1,170 @@
+stages:          # List of stages for jobs, and their order of execution
+  - build
+  - test
+  - deploy
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+variables:
+  IMAGE_TAG_BACKEND_DEV: ${CI_REGISTRY_IMAGE}/backend:$CI_COMMIT_SHORT_SHA.dev
+  IMAGE_TAG_BACKEND_PROD: ${CI_REGISTRY_IMAGE}/backend:$CI_COMMIT_SHORT_SHA.prod
+  IMAGE_TAG_FRONTEND_DEV: ${CI_REGISTRY_IMAGE}/frontend:$CI_COMMIT_SHORT_SHA.dev
+  IMAGE_TAG_FRONTEND_PROD: ${CI_REGISTRY_IMAGE}/frontend:$CI_COMMIT_SHORT_SHA.prod
+
+.build-base:
+  stage: build
+  image: docker:cli
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+build-backend:
+  extends: [".build-base"]
+  rules:
+    - changes:
+      - .gitlab-ci.yml
+      - backend/**/*
+  cache:
+    paths:
+      - ./backend/.rubygems
+  script:
+    - cd backend
+    - touch build.env
+    - du -sh .rubygems/ || true
+    - docker build --target dev -t "$IMAGE_TAG_BACKEND_DEV" .
+    - docker push "$IMAGE_TAG_BACKEND_DEV"
+    - docker create --name container $IMAGE_TAG_BACKEND_DEV
+    - docker cp container:/app/.rubygems ./
+    - du -sh .rubygems/ || true
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        docker build --target prod -t "$IMAGE_TAG_BACKEND_PROD" .
+        docker push "$IMAGE_TAG_BACKEND_PROD"
+        echo "IMAGE_BACKEND=${IMAGE_TAG_BACKEND_PROD}" >> build.env
+      fi
+  artifacts:
+    paths:
+      - backend/build.env
+build-frontend:
+  extends: [".build-base"]
+  rules:
+    - changes:
+      - .gitlab-ci.yml
+      - frontend/**/*
+  cache:
+    paths:
+      - ./frontend/.pnpm-store
+  script:
+    - cd frontend
+    - touch build.env
+    - du -sh .pnpm-store/ || true
+    - docker build --target dev -t "$IMAGE_TAG_FRONTEND_DEV" .
+    - docker push "$IMAGE_TAG_FRONTEND_DEV"
+    - docker create --name container $IMAGE_TAG_FRONTEND_DEV
+    - docker cp container:/app/.pnpm-store ./
+    - du -sh .pnpm-store/ || true
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        docker build --target prod -t "$IMAGE_TAG_FRONTEND_PROD" .
+        docker push "$IMAGE_TAG_FRONTEND_PROD"
+        echo "IMAGE_FRONTEND=${IMAGE_TAG_FRONTEND_PROD}" >> build.env
+      fi
+  artifacts:
+    paths:
+      - frontend/build.env
+
+.test-base:
+  stage: test
+  variables:
+    GIT_STRATEGY: none # 禁用 repo 下载，因为镜像中已经打包了代码
+  before_script:
+    - cd /app
+test-standardrb:
+  image: $IMAGE_TAG_BACKEND_DEV
+  extends: [".test-base"]
+  needs: ["build-backend"]
+  rules:
+    - changes:
+      - .gitlab-ci.yml
+      - backend/**/*
+  script:
+    - bundle exec standardrb
+test-rspec:
+  image: $IMAGE_TAG_BACKEND_DEV
+  extends: [".test-base"]
+  needs: ["build-backend"]
+  rules:
+    - changes:
+      - .gitlab-ci.yml
+      - backend/**/*
+  services:
+    - mysql:8.0
+  variables:
+    # services mysql 变量
+    MYSQL_ROOT_PASSWORD: password
+    TZ: Asia/Shanghai
+    # app 变量，需要跟 service 对应上
+    DATABASE_HOST: mysql
+    DATABASE_USERNAME: root
+    DATABASE_PASSWORD: password
+  script:
+    - bundle exec rails db:create db:test:prepare
+    - bundle exec rspec
+test-eslint:
+  image: $IMAGE_TAG_FRONTEND_DEV
+  extends: [".test-base"]
+  needs: ["build-frontend"]
+  rules:
+    - changes:
+      - .gitlab-ci.yml
+      - frontend/**/*
+  script:
+    - pnpm lint --max-warnings=0
+
+.deploy-base:
+  stage: deploy
+  image: alpine:3.17
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  dependencies: ["build-backend", "build-frontend"]
+  before_script:
+    - apk add openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 600 ~/.ssh
+    - ssh-keyscan -H ${DEPLOY_SERVER} >> ~/.ssh/known_hosts
+deploy-production:
+  extends: [".deploy-base"]
+  environment:
+    name: Production
+    url: https://admin-template.hdgcs.com
+  variables:
+    PROJECT_PATH: /home/ubuntu/admin-template/
+    DEPLOY_SERVER: change-me-in-cicd-settings
+    SSH_PRIVATE_KEY: change-me-in-cicd-settings
+    DEPLOY_USERNAME: change-me-in-cicd-settings
+    DEPLOY_TOKEN: change-me-in-cicd-settings
+  script:
+    - ssh ubuntu@${DEPLOY_SERVER} "
+        [ -d ${PROJECT_PATH} ] || (echo 'Please init deployment first' && exit 1)
+      "
+    - scp -r ubuntu@${DEPLOY_SERVER}:${PROJECT_PATH}/deployment/.dockerenv .dockerenv || true
+    - if [ -f ".dockerenv" ]; then source .dockerenv; else echo 'not found'; fi
+    - if [ -f "backend/build.env" ]; then source backend/build.env; else echo 'not found'; fi
+    - if [ -f "frontend/build.env" ]; then source frontend/build.env; else echo 'not found'; fi
+    - printf "IMAGE_BACKEND=${IMAGE_BACKEND}\nIMAGE_FRONTEND=${IMAGE_FRONTEND}\n" > .dockerenv
+    - scp -r deployment ubuntu@${DEPLOY_SERVER}:${PROJECT_PATH}
+    - scp -r .dockerenv ubuntu@${DEPLOY_SERVER}:${PROJECT_PATH}/deployment/
+    - ssh ubuntu@${DEPLOY_SERVER} "
+        sudo docker login -u ${DEPLOY_USERNAME} -p ${DEPLOY_TOKEN} ${CI_REGISTRY} &&
+        cd ${PROJECT_PATH}/deployment/ &&
+        sudo make images &&
+        sudo make ps &&
+        sudo make upd &&
+        sudo make images &&
+        sudo make ps
+      "
