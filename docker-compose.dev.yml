@@ -46,7 +46,7 @@ services:
   mysql:
     image: ${IMAGE_PROXY:-}mysql:8.0
     ports:
-      - "3309:3306"
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
       TZ: Asia/Shanghai

@@ -51,15 +51,21 @@
 brew install --cask docker # Docker 20 以上应该都可以
 ```
 
-### 2. 安装应用
+### 2. 安装系统
 
 请使用封装好的脚本进行安装，包括 Docker 初始化、bundle install、pnpm install、数据库初始化等步骤。
 
 ```bash
 make setup
+make up
 ```
 
-### 3. 管理应用
+系统启动后，可以通过以下链接访问服务：
+- 前端：http://localhost:4000
+- 后端：http://localhost:3000
+- 数据库：mysql://root:password@localhost:3306
+
+### 3. 管理系统
 
 项目通过 Makefile 封装常用命令，会将命令导向正确的执行容器，比如命令 `make console` 会实际解析成 `docker compose -f docker-compose.dev.yml run --rm rails bundle exec rails console`。
 
@@ -74,7 +80,7 @@ make package        # 执行前后端的 package install 任务，例如：`bund
 make console        # 进入 Rails Console 控制台
 ```
 
-### 4. 配置应用
+### 4. 配置系统
 
 1. 开发环境：`Makefile`, `docker-compose.dev.yml`, `backend/Dockerfile:dev`, `frontend/Dockerfile:dev`
 1. 部署环境：`deployment/Makefile`, `deployment/docker-compose.prod.yml`, `backend/Dockerfile:prod`, `frontend/Dockerfile:prod`

@@ -11,7 +11,7 @@ class UserDecorator < ApplicationDecorator
   #   end
 
   FIELDS = {
-    default: %i[id username name admin user_type roles role_names],
-    session: %i[id username name admin role_names permission_names user_type]
+    default: %i[id username name admin user_type created_at updated_at roles role_names],
+    session: %i[id username name admin user_type created_at updated_at roles role_names permission_names],
   }.freeze
 end
