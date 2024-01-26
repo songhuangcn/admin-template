@@ -26,10 +26,11 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-/.rubygems
 /erd.pdf
 /storage
 
 ~$*
 .DS_Store
 .env
+/bundle
+!.keep

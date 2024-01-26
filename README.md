@@ -20,11 +20,11 @@
 
 ## 使用系统
 
-你可以部署一套跟上面演示版本一样的系统，配置最低 1C1G，推荐 2C4G。部署步骤很简单：
+要使用系统，需要准备一台服务器，配置最低 1C2G，推荐 2C4G。具体步骤：
 1. 克隆代码：`git clone git@gitlab.com:songhuangcn/admin-template.git`
-1. 上传部署文件夹到你的服务器：`ssh your-host "mkdir -p /home/ubuntu/admin-template" && scp -r admin-template/deploy your-host:/home/ubuntu/admin-template/`
+1. 上传部署文件夹到你的服务器：`ssh your-host "mkdir -p /home/ubuntu/admin-template" && scp -r admin-template/deployment your-host:/home/ubuntu/admin-template/`
 1. 登录服务器并配置系统：
-    - 配置环境变量：`cp secrets/.env.sample secrets/.env` 做模板，其中的 `APP_DOMAIN` 和 `SECRET_KEY_BASE` 需要配置你自己的，其他的可以根据需要来
+    - 配置环境变量：`cp secrets/.env.sample secrets/.env`，然后修改 `secrets/.env` 内容，其中的 `APP_DOMAIN` 和 `SECRET_KEY_BASE` 需要配置你自己的，其他的可以根据需要来。
     - 配置 SSL 证书：将你的域名证书上传到服务器，位置：`secrets/ssl.crt` 和 `secrets/ssl.key`
 1. 在 GitLab 平台（gitlab.com 或者其他自建平台）中创建你的项目，进入 "Settings" -> "CI/CD" -> "Variables"，配置部署需要用到的变量（变量只需要输入 Key 和 Value 就行，其他都保持默认配置）：
     - `DEPLOY_SERVER`: 保持与上面服务器中配置的 `APP_DOMAIN` 一致

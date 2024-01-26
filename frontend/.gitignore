@@ -9,4 +9,5 @@ dist
 dist-ssr
 *.local
 
-.pnpm-store
+/pnpm-store
+!.keep

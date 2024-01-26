@@ -7,6 +7,7 @@ x-app: &app
       IMAGE_PROXY: ${IMAGE_PROXY:-}
       BUNDLER_MIRROR: https://mirrors.cloud.tencent.com/rubygems/
       APT_MIRROR: mirrors.cloud.tencent.com
+  platform: linux/amd64
   environment:
     DATABASE_HOST: mysql
     DATABASE_USERNAME: root
@@ -15,7 +16,7 @@ x-app: &app
   #   - .env
   volumes:
     - ./backend:/app
-    - dev_rubygems:/app/.rubygems
+    - dev_bundle:/bundle
   stdin_open: true
   tty: true
   depends_on:
@@ -34,7 +35,7 @@ services:
     command: bash -c "pnpm dev --host 0.0.0.0 --port 4000"
     volumes:
       - ./frontend:/app
-      - dev_pnpm_store:/app/.pnpm-store
+      - dev_pnpm_store:/pnpm-store
       - dev_pnpm_virtual:/app/node_modules
     ports:
       - "4000:4000"
@@ -56,5 +57,5 @@ services:
 volumes:
   dev_pnpm_store:
   dev_pnpm_virtual:
-  dev_rubygems:
+  dev_bundle:
   dev_mysql:

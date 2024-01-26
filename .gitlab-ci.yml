@@ -29,16 +29,16 @@ build-backend:
       - backend/**/*
   cache:
     paths:
-      - ./backend/.rubygems
+      - ./backend/bundle
   script:
     - cd backend
     - touch build.env
-    - du -sh .rubygems/ || true
+    - du -sh bundle || true
     - docker build --target dev -t "$IMAGE_TAG_BACKEND_DEV" .
     - docker push "$IMAGE_TAG_BACKEND_DEV"
     - docker create --name container $IMAGE_TAG_BACKEND_DEV
-    - docker cp container:/app/.rubygems ./
-    - du -sh .rubygems/ || true
+    - docker cp container:/bundle ./
+    - du -sh bundle || true
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         docker build --target prod -t "$IMAGE_TAG_BACKEND_PROD" .
@@ -56,16 +56,16 @@ build-frontend:
       - frontend/**/*
   cache:
     paths:
-      - ./frontend/.pnpm-store
+      - ./frontend/pnpm-store
   script:
     - cd frontend
     - touch build.env
-    - du -sh .pnpm-store/ || true
+    - du -sh pnpm-store/ || true
     - docker build --target dev -t "$IMAGE_TAG_FRONTEND_DEV" .
     - docker push "$IMAGE_TAG_FRONTEND_DEV"
     - docker create --name container $IMAGE_TAG_FRONTEND_DEV
-    - docker cp container:/app/.pnpm-store ./
-    - du -sh .pnpm-store/ || true
+    - docker cp container:/pnpm-store ./
+    - du -sh pnpm-store/ || true
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         docker build --target prod -t "$IMAGE_TAG_FRONTEND_PROD" .
