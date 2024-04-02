@@ -3,11 +3,19 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import svgLoader from 'vite-svg-loader';
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import configArcoStyleImportPlugin from './plugin/arcoStyleImport';
+import autoImportPlugin from './plugin/autoImport';
 
 export default defineConfig({
   plugins: [
     vue(),
+    autoImportPlugin(),
+    VueI18nPlugin({
+      runtimeOnly: true,
+      compositionOnly: true,
+      include: [resolve('locales/**')],
+    }),
     vueJsx(),
     svgLoader({ svgoConfig: {} }),
     configArcoStyleImportPlugin(),
@@ -21,10 +29,6 @@ export default defineConfig({
       {
         find: 'assets',
         replacement: resolve(__dirname, '../src/assets'),
-      },
-      {
-        find: 'vue-i18n',
-        replacement: 'vue-i18n/dist/vue-i18n.cjs.js', // Resolve the i18n warning issue
       },
       {
         find: 'vue',
@@ -47,5 +51,9 @@ export default defineConfig({
         javascriptEnabled: true,
       },
     },
+  },
+  optimizeDeps: {
+    include: ['mitt', 'dayjs', 'axios', 'pinia', '@vueuse/core', 'vue-i18n'],
+    exclude: ['@iconify-icons/lets-icons'],
   },
 });

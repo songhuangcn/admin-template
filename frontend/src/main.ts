@@ -1,6 +1,4 @@
 import { createApp } from 'vue';
-import ArcoVue, { Message } from '@arco-design/web-vue';
-import ArcoVueIcon from '@arco-design/web-vue/es/icon';
 import globalComponents from '@/components';
 import router from './router';
 import store from './store';
@@ -12,14 +10,12 @@ import App from './App.vue';
 // 样式通过 arco-plugin 插件导入。详见目录文件 config/plugin/arcoStyleImport.ts
 // https://arco.design/docs/designlab/use-theme-package
 import '@/assets/style/global.less';
+import '@arco-design/web-vue/es/message/style/index.less';
+import '@arco-design/web-vue/es/notification/style/index.less';
+import '@arco-design/web-vue/es/modal/style/index.less';
 import '@/api/interceptor';
 
 const app = createApp(App);
-
-app.use(ArcoVue, {});
-app.use(ArcoVueIcon);
-// eslint-disable-next-line no-underscore-dangle
-Message._context = app._context;
 
 app.use(router);
 app.use(store);
