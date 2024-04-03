@@ -1,5 +1,3 @@
-import { AxiosResponse } from 'axios';
-
 export interface Pagination {
   total: number;
   per_page: number;
@@ -12,8 +10,11 @@ export interface Meta {
 }
 
 declare module 'axios' {
-  interface AxiosResponse<T = any> extends Promise<T> {
-    meta: Meta;
-    data: T;
+  interface HttpResponse<T = unknown> {
+    status?: number;
+    msg?: string;
+    code?: number;
+    data?: T;
   }
+  type AxiosResponse<T = any> = HttpResponse<T>;
 }
