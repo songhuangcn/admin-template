@@ -4,7 +4,12 @@
 
 [![pipeline status](https://gitlab.com/songhuangcn/admin-template/badges/main/pipeline.svg)](https://gitlab.com/songhuangcn/admin-template/-/commits/main)
 
-后台管理系统模板，功能亮点：
+Ruby 管理系统启动器。相关链接：
+- 博文：[如何做好一个软件项目](https://hdgcs.com/posts/28-how-to-make-better-project)
+- Golang 版：[Admin Starter](https://github.com/songhuangcn/admin-starter)
+
+## 功能
+
 - 完善的管理系统核心功能：包含基本的认证权限功能，权限系统基于 RBAC 模型，对所有接口进行了权限控制。权限列表由后端路由自动生成，不需要手动维护。完善的前后端多语言功能。
 - 便捷的开发体验：所有环境容器化，本地只需安装 docker 即可快速进行开发。使用 Makefile 进行了常用命令的封装。
 - 更可靠的项目管理：完善的 CI/CD 功能，让构建和部署变得更简单。添加了代码规范和单元测试检测，保证项目质量。
