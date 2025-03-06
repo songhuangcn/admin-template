@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rails
+  labels:
+    app: rails
+spec:
+  ports:
+  - port: 3000
+  selector:
+    app: rails
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rails-log-pvc
+  labels:
+    app: rails
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rails
+  labels:
+    app: rails
+spec:
+  selector:
+    matchLabels:
+      app: rails
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: rails
+    spec:
+      containers:
+      - name: rails
+        image: backend
+        command: ["bash", "-c", "bin/rails db:migrate db:seed && rm -f tmp/pids/server.pid && bin/rails server -b 0.0.0.0 -p 3000"]
+        envFrom:
+        - configMapRef:
+            name: app-configmap
+        - secretRef:
+            name: app-secret
+        ports:
+        - containerPort: 80
+          name: rails
+        volumeMounts:
+        - name: rails-log-storage
+          mountPath: /app/log
+      imagePullSecrets:
+      - name: docker-secret
+      volumes:
+      - name: rails-log-storage
+        persistentVolumeClaim:
+          claimName: rails-log-pvc

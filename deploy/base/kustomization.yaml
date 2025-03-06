@@ -1,0 +1,27 @@
+kind: Kustomization
+namespace: admin-template
+images:
+- name: backend
+  newName: registry.gitlab.com/songhuangcn/admin-template/backend:3f6b0d54.prod
+- name: frontend
+  newName: registry.gitlab.com/songhuangcn/admin-template/frontend:3f6b0d54.prod
+- name: mysql
+  newName: mysql
+  newTag: '8.0'
+- name: redis
+  newName: redis
+  newTag: '7.0'
+resources:
+- configmap.yaml
+- ingress.yaml
+- app-sealed-secret.yaml
+- docker-sealed-secret.yaml
+- mysql.yaml
+- nginx.yaml
+- rails.yaml
+configMapGenerator:
+- name: nginx-config
+  files:
+  - config/nginx-server.conf
+generatorOptions:
+  disableNameSuffixHash: true

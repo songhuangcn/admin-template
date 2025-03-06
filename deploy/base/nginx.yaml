@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: frontend
+        envFrom:
+        - configMapRef:
+            name: app-configmap
+        - secretRef:
+            name: app-secret
+        ports:
+        - containerPort: 80
+          name: nginx
+        volumeMounts:
+        - name: nginx-config
+          subPath: nginx-server.conf
+          mountPath: /etc/nginx/conf.d/default.conf
+      imagePullSecrets:
+      - name: docker-secret
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config

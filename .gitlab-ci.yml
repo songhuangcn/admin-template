@@ -128,7 +128,7 @@ test-eslint:
   stage: deploy
   image: alpine:3.17
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "null"
   dependencies: ["build-backend", "build-frontend"]
   before_script:
     - apk add openssh-client

@@ -1,0 +1,34 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: https-redirect
+  namespace: admin-template
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # 引用 ClusterIssuer
+    traefik.ingress.kubernetes.io/router.middlewares: admin-template-https-redirect@kubernetescrd
+spec:
+  ingressClassName: traefik  # 使用 k3s 默认的 Traefik
+  tls:
+  - hosts:
+    - admin-template.hdgcs.com # 你的域名
+    secretName: tls-secret  # 证书存储的 Secret 名称
+  rules:
+  - host: admin-template.hdgcs.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx
+            port:
+              number: 80
