@@ -1,5 +1,14 @@
 KUBE = kubectl -n admin-template
 
+setup:
+		kubectl create namespace admin-template
+
+build:
+	docker build --target=prod -t registry.gitlab.com/songhuangcn/admin-template/backend:latest -f ../backend/Dockerfile ../backend
+	docker push registry.gitlab.com/songhuangcn/admin-template/backend:latest
+	docker build --target=prod -t registry.gitlab.com/songhuangcn/admin-template/frontend:latest -f ../frontend/Dockerfile ../frontend
+	docker push registry.gitlab.com/songhuangcn/admin-template/frontend:latest
+
 status:
 		$(KUBE) get all
 
@@ -8,9 +17,6 @@ apply:
 
 replace:
 		$(KUBE) replace --force -k base
-
-delete:
-		$(KUBE) delete -k base
 
 encode:
 		kubeseal --format=yaml --cert=base/config/sealed-secret.crt < base/app-secret.yaml > base/app-sealed-secret.yaml

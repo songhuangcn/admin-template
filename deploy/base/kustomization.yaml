@@ -2,9 +2,9 @@ kind: Kustomization
 namespace: admin-template
 images:
 - name: backend
-  newName: registry.gitlab.com/songhuangcn/admin-template/backend:3f6b0d54.prod
+  newName: registry.gitlab.com/songhuangcn/admin-template/backend:latest
 - name: frontend
-  newName: registry.gitlab.com/songhuangcn/admin-template/frontend:3f6b0d54.prod
+  newName: registry.gitlab.com/songhuangcn/admin-template/frontend:latest
 - name: mysql
   newName: mysql
   newTag: '8.0'
