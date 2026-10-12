@@ -18,4 +18,6 @@ permissions:
 jobs:
   autoteam:
     uses: autoteam-ai/autoteam/.github/workflows/member.yml@main
-    secrets: inherit
+    # 不用 secrets: inherit：它只在同一组织内生效，跨账号调用时 secret 传不过去
+    secrets:
+      MULTICA_DEPLOY_HOOK: ${{ secrets.MULTICA_DEPLOY_HOOK }}
