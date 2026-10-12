@@ -37,7 +37,7 @@ purge:
 check:
 	$(COMPOSE) build
 	$(COMPOSE) up -d mysql
-	$(COMPOSE) run --rm rails bash -c 'until mysqladmin ping -h"$$DATABASE_HOST" -uroot -p"$$DATABASE_PASSWORD" --silent; do sleep 2; done'
+	$(COMPOSE) run --rm rails ruby -rsocket -e 'Process.clock_gettime(Process::CLOCK_MONOTONIC).then { |t0| begin; TCPSocket.new(ENV.fetch("DATABASE_HOST"), 3306).close; rescue SystemCallError, SocketError; abort("等待 MySQL 超过 120 秒") if Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0 > 120; sleep 2; retry; end }'
 	$(COMPOSE) run --rm rails bundle exec standardrb
 	$(COMPOSE) run --rm -e RAILS_ENV=test rails bash -c 'bundle exec rails db:create db:test:prepare && bundle exec rspec'
 	$(COMPOSE) run --rm vuejs pnpm lint --max-warnings=0
