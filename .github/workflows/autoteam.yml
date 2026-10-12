@@ -1,0 +1,21 @@
+# autoteam：合并闸门（必需检查 "autoteam / check"：PR 行数上限 + make check）和上线
+# （make deploy + 通知 Planner）。逻辑在团队仓库的可复用工作流里，升级 autoteam 不用改这个文件；
+# 本项目的配置在团队仓库的 .autoteam/projects/songhuangcn/admin-template/。
+name: autoteam
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  deployments: read
+  actions: read
+  pull-requests: read
+
+jobs:
+  autoteam:
+    uses: autoteam-ai/autoteam/.github/workflows/member.yml@main
+    secrets: inherit
