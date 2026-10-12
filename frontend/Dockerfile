@@ -5,7 +5,7 @@ ARG NGINX_IMAGE="nginx:1.22"
 FROM ${IMAGE_PROXY}${NODE_IMAGE} AS dev
 ARG NPM_MIRROR=""
 WORKDIR /app
-RUN npm install -g pnpm && \
+RUN npm install -g pnpm@8 && \
   if [ -n "$NPM_MIRROR" ]; then \
     pnpm config set registry ${NPM_MIRROR} \
   ; fi && \
