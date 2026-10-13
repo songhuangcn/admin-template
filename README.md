@@ -53,6 +53,8 @@ The system utilizes GitLab CI/CD for building, testing, and deployment. The pipe
 
 3. **deploy**: Deploys the successfully built images from the "build" stage that have passed the test verification. This stage only runs on the main branch.
 
+On GitHub, `.github/workflows/autoteam.yml` (the autoteam merge gate) runs `make check` on pull requests as the required check `autoteam / check`, and `make deploy` after merging to the main branch.
+
 ## Local Development
 
 ### 1. Install Dependencies
@@ -90,6 +92,9 @@ make bash-rails     # Enter the Rails container's bash
 make build          # Rebuild front-end and back-end images
 make package        # Execute front-end and back-end package install tasks, e.g., `bundle install`, `pnpm install`
 make console        # Enter the Rails Console console
+make check          # All checks: standardrb, rspec (starts MySQL), front-end lint
+make dev            # Install dependencies, set up the database and start the dev environment in the background; safe to rerun
+make deploy         # Build the front-end and back-end production images (not pushed)
 ```
 
 ### 4. Configure the System

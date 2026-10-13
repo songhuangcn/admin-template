@@ -49,6 +49,8 @@ Ruby 管理系统启动器。相关链接：
 1. test: 使用上一个阶段构建的环境镜像运行测试，保证新代码的健康。前后端只会在有代码更改时进行验证。
 1. deploy: 对 build 镜像成功并通过 test 校验的版本进行部署，只在主分支上运行。
 
+GitHub 上由 `.github/workflows/autoteam.yml`（autoteam 团队的合并闸门）运行：PR 上执行 `make check`，作为合并前的必需检查 `autoteam / check`；合并到主分支后执行 `make deploy`。
+
 ## 本地开发
 
 ### 1. 安装依赖
@@ -86,6 +88,9 @@ make bash-rails     # 进入应用 rails 容器的 bash
 make build          # 重新构建前后端镜像
 make package        # 执行前后端的 package install 任务，例如：`bundle install`, `pnpm install`
 make console        # 进入 Rails Console 控制台
+make check          # 全部检查：standardrb、rspec（自动起 MySQL）、前端 lint
+make dev            # 安装依赖、建库迁移并后台启动开发环境，可重复执行
+make deploy         # 构建前后端生产镜像（不推送）
 ```
 
 ### 4. 配置系统
